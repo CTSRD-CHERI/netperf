@@ -274,7 +274,7 @@ int interval_count;
 	 waiting for a timer. raj 2006-02-06 */ \
       start_itimer(interval_wate); \
     } \
-    interval_count = interval_burst; 
+    interval_count = interval_burst;
 #else
 sigset_t signal_set;
 #define INTERVALS_INIT() \
@@ -1535,7 +1535,7 @@ create_data_socket(struct addrinfo *res)
 	      errno);
     }
   }
-    
+
   return temp_socket;
 }
 
@@ -3011,7 +3011,7 @@ Size (bytes)\n\
     }
 
     stop_timer();
-	
+
 #if defined(WANT_INTERVALS)
 #ifdef WIN32
     stop_itimer();
@@ -5307,7 +5307,7 @@ recv_tcp_stream()
         send_response();
         exit(1);
       }
-    }    
+    }
     assert(recv_ring->completion_ptr != NULL);
   }
 #endif
@@ -5375,7 +5375,7 @@ recv_tcp_stream()
         netperf_response.content.serv_errno = errno;
         send_response();
         exit(1);
-      }      
+      }
     }
 #endif
 

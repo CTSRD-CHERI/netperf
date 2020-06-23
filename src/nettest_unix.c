@@ -2306,19 +2306,15 @@ bytes  bytes  bytes   bytes  secs.   per sec  %%      %%      us/Tr   us/Tr\n\n"
     printf("malloc(%d) failed!\n", DATABUFFERLEN);
     exit(1);
   }
-  send_message_ptr = (char *)(( (long)temp_message_ptr +
-			(long) local_send_align - 1) &
-			~((long) local_send_align - 1));
-  send_message_ptr = send_message_ptr + local_send_offset;
+  send_message_ptr = ALIGN_BUFFER(temp_message_ptr, local_send_align,
+      local_send_offset);
   temp_message_ptr = (char *)malloc(DATABUFFERLEN);
   if (temp_message_ptr == NULL) {
     printf("malloc(%d) failed!\n", DATABUFFERLEN);
     exit(1);
   }
-  recv_message_ptr = (char *)(( (long)temp_message_ptr +
-			(long) local_recv_align - 1) &
-			~((long) local_recv_align - 1));
-  recv_message_ptr = recv_message_ptr + local_recv_offset;
+  recv_message_ptr = ALIGN_BUFFER(temp_message_ptr, local_recv_align,
+      local_recv_offset);
 
   /*set up the data socket                        */
   send_socket = create_unix_socket(AF_UNIX,
