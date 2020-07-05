@@ -22,7 +22,7 @@ AM_CONFIG_HEADER(config.h)
 AC_CONFIG_LIBOBJ_DIR(src/missing)
 
 # make sure we build netperf_version.h
-touch  ${ac_top_srcdir}src/netperf_version.h.in
+touch  ${srcdir}/src/netperf_version.h.in
 
 # Checks for programs.
 AC_PROG_CC
