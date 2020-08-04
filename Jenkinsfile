@@ -15,6 +15,7 @@ jobs = [:]
     jobs[suffix] = { ->
         cheribuildProject(
             target: name,
+            capTableABI: "pcrel",
             architecture: suffix,
             runTests:false,
             tarballName: "${name}.tar.xz")
