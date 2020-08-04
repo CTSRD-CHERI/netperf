@@ -23,7 +23,7 @@ jobs = [:]
     }
 }
 
-node("freebsd") {
+node("linux") {
     jobs.failFast = false
     parallel jobs
 }
