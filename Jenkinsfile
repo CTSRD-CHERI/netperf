@@ -16,6 +16,7 @@ jobs = [:]
         cheribuildProject(
             target: name,
             capTableABI: "pcrel",
+            customGitCheckoutDir: 'netperf',
             architecture: suffix,
             runTests:false,
             tarballName: "${name}.tar.xz")
