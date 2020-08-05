@@ -225,7 +225,7 @@ case "$enable_unixdomain" in
      yes)
 		use_unixdomain=true
 		;;
-     no)	
+     no)
 		use_unixdomain=false
 		;;
      '')
@@ -259,7 +259,7 @@ case "$enable_dlpi" in
      yes)
 		use_dlpi=true
 		;;
-     no)	
+     no)
 		use_dlpi=false
 		;;
      '')
@@ -293,7 +293,7 @@ case "$enable_dccp" in
      yes)
 		use_dccp=true
 		;;
-     no)	
+     no)
 		use_dccp=false
 		;;
      '')
@@ -327,7 +327,7 @@ case "$enable_omni" in
      yes)
 		use_omni=true
 		;;
-     no)	
+     no)
 		use_omni=false
 		;;
      '')
@@ -363,7 +363,7 @@ case "$enable_xti" in
      yes)
 		use_xti=true
 		;;
-     no)	
+     no)
 		use_xti=false
 		;;
      '')
@@ -399,7 +399,7 @@ case "$enable_sdp" in
 		AC_CHECK_LIB(sdp,t_open)
 		use_sdp=true
 		;;
-     no)	
+     no)
 		use_sdp=false
 		;;
      '')
@@ -435,7 +435,7 @@ case "$enable_exs" in
 		AC_CHECK_HEADER(sys/exs.h,,[use_exs=false])
 		AC_CHECK_LIB(exs,exs_init,,[use_exs=false])
 		;;
-     no)	
+     no)
 		use_exs=false
 		;;
      '')
@@ -641,7 +641,7 @@ case "$enable_cpuutil" in
 	looper)
 		use_cpuutil=true
 		AC_DEFINE([USE_LOOPER],,[Use looper/soaker processes to measure CPU util.])
-		;;		
+		;;
 	procstat)
 		use_cpuutil=true
 		AC_DEFINE([USE_PROC_STAT],,[Use Linux's procstat interface to measure CPU util.])
@@ -734,6 +734,11 @@ esac
 	AC_MSG_RESULT("$enable_cpuutil")
 
 AC_SUBST(NETCPU_SOURCE)
+
+AC_ARG_ENABLE(docs,[AS_HELP_STRING([--enable-docs], [enable building documentation])])
+AC_MSG_CHECKING([whether to enable documentation])
+AS_IF([test "x${enable_docs}" = "xyes" ], AC_MSG_RESULT([yes]), AC_MSG_RESULT([no]))
+AM_CONDITIONAL([ENABLEDOCS],[test "x${enable_docs}" = "xyes"])
 
 
 # now spit it all out
