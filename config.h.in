@@ -386,6 +386,9 @@
 /* Define to one to include XTI tests. */
 #undef WANT_XTI
 
+/* Define to enable PMC counters */
+#undef WITH_HW_COUNTERS
+
 /* Enable large inode numbers on Mac OS X 10.5.  */
 #ifndef _DARWIN_USE_64_BIT_INODE
 # define _DARWIN_USE_64_BIT_INODE 1

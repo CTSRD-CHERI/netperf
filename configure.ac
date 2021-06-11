@@ -615,6 +615,43 @@ then
 	AC_DEFINE([WANT_FIRST_BURST],,[Define to one to enable initial _RR burst support. May affect results.])
 fi
 
+AC_MSG_CHECKING([whether to include hardware pmc profiling ])
+
+AC_ARG_ENABLE(pmc,
+	[AS_HELP_STRING([--enable-pmc],[measure hardware performance counters])])
+
+PMCPROFILE_SOURCE="$enable_pmc"
+PMC_LDFLAGS=""
+case "$enable_pmc" in
+	pmc)
+		use_pmc=true
+		pmc_symbol="pmc_init"
+		PMC_LDFLAGS="-lc++"
+		;;
+	statcounters)
+		use_pmc=true
+		pmc_symbol="statcounters_sample"
+		;;
+	'')
+		use_pmc=false
+		;;
+	*)
+		AC_MSG_ERROR([--enable-pmc-profile takes pmc or statcounters])
+		;;
+esac
+AM_CONDITIONAL([WITH_HW_COUNTERS], [test x$use_pmc = xtrue])
+AC_SUBST(PMCPROFILE_SOURCE)
+AC_SUBST(PMC_LDFLAGS)
+
+if $use_pmc
+then
+	AC_DEFINE([WITH_HW_COUNTERS],,[Define to enable PMC counters])
+	AC_MSG_RESULT("lib$enable_pmc")
+	AC_CHECK_LIB($enable_pmc, $pmc_symbol,,AC_MSG_ERROR([Missing library $enable_pmc]),$PMC_LDFLAGS)
+else
+	AC_MSG_RESULT(no)
+fi
+
 # time to see about CPU utilization measurements
 
 AC_MSG_CHECKING([which CPU utilization measurement type to use])

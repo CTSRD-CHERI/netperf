@@ -15,8 +15,22 @@ COMMON_SRC = hist.h netlib.c netlib.h netcpu.h netsh.c netsh.h nettest_bsd.c net
 netperf_SOURCES = netperf.c $(COMMON_SRC) $(USE_CPU_SOURCE) $(USE_SYS_SOURCE) $(USE_SEC_SOURCE) $(USE_FIRE_SOURCE)
 netserver_SOURCES = netserver.c $(COMMON_SRC) $(USE_CPU_SOURCE) $(USE_SYS_SOURCE) $(USE_SEC_SOURCE) $(USE_FIRE_SOURCE)
 
+netperf_LDADD =
+netserver_LDADD =
+
 # if there are any "missing" routines, the libobjs should cover it
 if NEED_LIBCOMPAT
-netperf_LDADD = missing/libcompat.a
-netserver_LDADD = missing/libcompat.ap
+netperf_LDADD += missing/libcompat.a
+netserver_LDADD += missing/libcompat.ap
+endif
+
+if WITH_HW_COUNTERS
+USE_PMC_SOURCE = profile_@PMCPROFILE_SOURCE@.c
+USE_PMC_LDFLAGS = -l@PMCPROFILE_SOURCE@
+USE_PMC_LDFLAGS += @PMC_LDFLAGS@
+
+netperf_SOURCES += $(USE_PMC_SOURCE)
+netserver_SOURCES += $(USE_PMC_SOURCE)
+netperf_LDADD += $(USE_PMC_LDFLAGS)
+netserver_LDADD += $(USE_PMC_LDFLAGS)
 endif
