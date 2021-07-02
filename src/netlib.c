@@ -74,6 +74,7 @@ char    netlib_id[]="\
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <math.h>
 #include <string.h>
 #include <assert.h>
@@ -3115,6 +3116,7 @@ dump_addrinfo(FILE *dumploc, struct addrinfo *info,
 {
   struct sockaddr *ai_addr;
   struct addrinfo *temp;
+  int addrlen;
   temp=info;
 
   fprintf(dumploc,
@@ -3145,7 +3147,8 @@ dump_addrinfo(FILE *dumploc, struct addrinfo *info,
       fprintf(dumploc,
               "\tsa_family: %s sadata:",
               inet_ftos(ai_addr->sa_family));
-      for (i = 0; i < (int) temp->ai_addrlen; i++) {
+      addrlen = temp->ai_addrlen - offsetof(struct sockaddr, sa_data);
+      for (i = 0; i < addrlen; i++) {
 	fprintf(dumploc,
 		(temp->ai_family == AF_INET) ? " %d" : " %.2x",
 		(u_char)ai_addr->sa_data[i]);
