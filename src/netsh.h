@@ -5,6 +5,8 @@
 /* libraried performance include file 				*/
 /* the define NOPERFEXTERN tels us not to re-define all the 	*/
 
+#include <stdbool.h>
+
 /* defines and defaults */
 #define		HOSTNAMESIZE 	255
 #define         PORTBUFSIZE     10
@@ -194,6 +196,15 @@ extern char
 
 extern char *
   result_brand;
+
+extern char *
+  pmc_profile_path;
+
+extern char *
+  pmc_profile_setname;
+
+extern bool
+  pmc_profile_enabled;
 
 extern int
   no_control;

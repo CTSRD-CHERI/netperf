@@ -164,6 +164,7 @@ char    netlib_id[]="\
 #include "netsh.h"
 #include "netcpu.h"
 #include "netperf_version.h"
+#include "profile.h"
 
 /****************************************************************/
 /*                                                              */
@@ -1442,7 +1443,6 @@ netlib_init()
   /* some functionality might want to use random numbers, so we should
      initialize the random number generator */
   srand(getpid());
-
 }
 
 /* this routine will conver the string into an unsigned integer. it is
@@ -3563,6 +3563,9 @@ cpu_start(int measure_cpu)
     cpu_method = get_cpu_method();
     cpu_start_internal();
   }
+
+  if (pmc_profile_enabled)
+	  pmc_profile_start();
 }
 
 
@@ -3574,6 +3577,9 @@ cpu_stop(int measure_cpu, float *elapsed)
   int     sec,
     usec;
 
+  if (pmc_profile_enabled)
+	  pmc_profile_stop();
+
   if (measure_cpu) {
     cpu_stop_internal();
     cpu_util_terminate();
@@ -3581,6 +3587,9 @@ cpu_stop(int measure_cpu, float *elapsed)
 
   gettimeofday(&time2,
 	       &tz);
+
+  if (pmc_profile_enabled)
+	  pmc_profile_dump();
 
   if (time2.tv_usec < time1.tv_usec) {
     time2.tv_usec += 1000000;

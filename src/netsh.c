@@ -87,7 +87,7 @@ extern	int	getopt(int , char **, char *) ;
    getopt to parse the command line, we will tell getopt that they do
    not take parms, and then look for them ourselves */
 
-#define GLOBAL_CMD_LINE_ARGS "A:a:b:B:CcdD:f:F:H:hi:I:jk:K:l:L:n:NO:o:P:p:rSs:t:T:v:VW:w:y:Y:Z:46"
+#define GLOBAL_CMD_LINE_ARGS "A:a:b:B:CcdD:f:F:g:G:H:hi:I:jk:K:l:L:n:NO:o:P:p:rSs:t:T:v:VW:w:y:Y:Z:46"
 
 /************************************************************************/
 /*									*/
@@ -128,6 +128,9 @@ int
    to help identify a specific netperf result when concurrent netperfs
    are run. raj 2006-02-01 */
 char *result_brand = NULL;
+char *pmc_profile_path = NULL;	/* PMC output file path */
+char *pmc_profile_setname = NULL; /* PMC counters to enable */
+bool pmc_profile_enabled = false; /* PMC monitoring enabled */
 
 /* cpu variables */
 int
@@ -260,6 +263,8 @@ Global options:\n\
                       system's timestamping functionality\n\
     -f G|M|K|g|m|k    Set the output units\n\
     -F lfill[,rfill]* Pre-fill buffers with data from specified file\n\
+    -g pmc_name       Enable PMC monitoring with the given performance counters set.\n\
+    -G pmcfile        Emit PMC samples to the given output file.\n\
     -h                Display this text\n\
     -H name|ip,fam *  Specify the target machine and/or local ip and family\n\
     -i max,min        Specify the max and min number of iterations (15,1)\n\
@@ -716,6 +721,13 @@ scan_cmd_line(int argc, char *argv[])
 	strncpy(remote_fill_file,arg2,sizeof(remote_fill_file));
 	remote_fill_file[sizeof(remote_fill_file) - 1] = '\0';
       }
+      break;
+    case 'g':
+      pmc_profile_setname = optarg;
+      pmc_profile_enabled = true;
+      break;
+    case 'G':
+      pmc_profile_path = optarg;
       break;
     case 'i':
       /* set the iterations min and max for confidence intervals */

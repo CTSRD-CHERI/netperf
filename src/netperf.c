@@ -75,6 +75,7 @@ char	netperf_id[]="\
 #include "netsh.h"
 #include "netlib.h"
 #include "nettest_bsd.h"
+#include "profile.h"
 
 #ifdef WANT_UNIX
 #include "nettest_unix.h"
@@ -125,6 +126,9 @@ main(int argc, char *argv[])
   /* the call to set_defaults() is gone because we can initialize in
      declarations (or is that definitions) unlike the old days */
   scan_cmd_line(argc,argv);
+
+  /* Initialize performance counters */
+  pmc_profile_setup("netperf");
 
   if (debug) {
     dump_globals();

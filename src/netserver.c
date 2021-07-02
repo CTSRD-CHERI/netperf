@@ -145,6 +145,7 @@ char	netserver_id[]="\
 /* netperf includes */
 #include "netlib.h"
 #include "nettest_bsd.h"
+#include "profile.h"
 
 #ifdef WANT_UNIX
 #include "nettest_unix.h"
@@ -1538,6 +1539,9 @@ main(int argc, char *argv[]) {
   strncpy(listen_port,TEST_PORT,sizeof(listen_port));
 
   scan_netserver_args(argc, argv);
+
+  /* Initialize performance counters */
+  pmc_profile_setup("netserver");
 
   check_if_inetd();
 
