@@ -786,6 +786,10 @@ AC_CONFIG_FILES([Makefile
 		 src/missing/m4/Makefile
 		 doc/Makefile
 		 doc/examples/Makefile
+		 scripts/Makefile
                  netperf.spec])
+
+AC_SUBST(TARGET_CPU, $target_cpu)
+AC_CONFIG_FILES([scripts/run-benchmark.sh], [chmod +x scripts/run-benchmark.sh])
 
 AC_OUTPUT
