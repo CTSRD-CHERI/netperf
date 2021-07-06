@@ -14,26 +14,11 @@
 
 #define MAXPRINTLEN 512
 static FILE *statfile;
-static statcounters_bank_t start;
-static statcounters_bank_t stop;
-static statcounters_bank_t cpu_statcounters;
+static statcounters_bank_t start, stop;
+static statcounters_bank_t scratch;
 static char benchmark_progname[MAXPRINTLEN];
 static char benchmark_archname[MAXPRINTLEN];
 static const char *benchmark_kernabi;
-
-void
-pmc_profile_dump()
-{
-	statcounters_diff(&cpu_statcounters, &stop, &start);
-	statcounters_dump_with_args(&cpu_statcounters, benchmark_progname,
-	    NULL, benchmark_archname,
-	    statfile, CSV_HEADER);
-
-	/* Reset for next iteration */
-	statcounters_zero(&start);
-	statcounters_zero(&stop);
-	statcounters_zero(&cpu_statcounters);
-}
 
 void
 pmc_profile_setup(const char *side)
@@ -80,17 +65,31 @@ pmc_profile_setup(const char *side)
 
 	statcounters_zero(&start);
 	statcounters_zero(&stop);
-	statcounters_zero(&cpu_statcounters);
+	statcounters_zero(&scratch);
 }
 
 void
-pmc_profile_start()
+_pmc_profile_dump()
+{
+	statcounters_diff(&scratch, &stop, &start);
+	statcounters_dump_with_args(&scratch, benchmark_progname,
+	    NULL, benchmark_archname,
+	    statfile, csv_fmt);
+
+	/* Reset for next iteration */
+	statcounters_zero(&start);
+	statcounters_zero(&stop);
+	statcounters_zero(&scratch);
+}
+
+void
+_pmc_profile_start()
 {
 	statcounters_sample(&start);
 }
 
 void
-pmc_profile_stop()
+_pmc_profile_stop()
 {
 	statcounters_sample(&stop);
 }

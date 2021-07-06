@@ -56,10 +56,6 @@ pmc_cpu_setup(int cpuid)
     pmc_name = arch_pmc[++index];
   }
 }
-
-void
-pmc_profile_dump()
-{}
   
 void
 pmc_profile_setup()
@@ -96,7 +92,11 @@ pmc_profile_setup()
 }
 
 void
-pmc_profile_start()
+_pmc_profile_dump()
+{}
+
+void
+_pmc_profile_start()
 {
   int index;
   pmc_id_t pmc_id;
@@ -111,7 +111,7 @@ pmc_profile_start()
 }
 
 void
-pmc_profile_stop()
+_pmc_profile_stop()
 {
   int index;
   pmc_id_t pmc_id;
