@@ -71,6 +71,13 @@ pmc_profile_setup(const char *side)
 void
 _pmc_profile_dump()
 {
+	statcounters_fmt_flag_t csv_fmt;
+
+	if (ftello(statfile) == 0)
+		csv_fmt = CSV_HEADER;
+	else
+		csv_fmt = CSV_NOHEADER;
+
 	statcounters_diff(&scratch, &stop, &start);
 	statcounters_dump_with_args(&scratch, benchmark_progname,
 	    NULL, benchmark_archname,
