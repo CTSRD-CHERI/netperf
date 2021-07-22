@@ -100,6 +100,12 @@ char nettest_omni_id[]="\
 # endif
 #endif
 
+/*
+ * XXX-AM: should probably ifdef for WIN32 but I don't
+ * care enough for now
+ */
+#include <sys/sysctl.h>
+
 #ifdef HAVE_NETINET_SCTP_H
 #include <netinet/sctp.h>
 #endif
@@ -436,6 +442,9 @@ char *socket_type_str;
 char *protocol_str;
 char *direction_str;
 
+char *cheri_netperf_abi;
+char *cheri_kernel_abi;
+
 extern int first_burst_size;
 
 int  parallel_connections = 1;
@@ -661,9 +670,11 @@ enum netperf_output_name {
   REMOTE_CONG_CONTROL,
   LOCAL_FILL_FILE,
   REMOTE_FILL_FILE,
+  NETPERF_ABI,
+  KERNEL_ABI,
   COMMAND_LINE,    /* COMMAND_LINE should always be "last" */
   OUTPUT_END,
-  NETPERF_OUTPUT_MAX
+  NETPERF_OUTPUT_MAX,
 };
 
 /* flags for the output groups, lower 16 bits for remote, upper 16
@@ -2460,6 +2471,12 @@ print_omni_init_list() {
 
   set_output_elt(REMOTE_FILL_FILE, "Remote", "Fill", "File", "", "%s",
 		 remote_fill_file, 0, 0, NETPERF_TYPE_CHAR);
+
+  set_output_elt(NETPERF_ABI, "CHERI", "Netperf", "ABI", "", "%s",
+		 cheri_netperf_abi, 0, 0, NETPERF_TYPE_CHAR);
+
+  set_output_elt(KERNEL_ABI, "CHERI", "Kernel", "ABI", "", "%s",
+		 cheri_kernel_abi, 0, 0, NETPERF_TYPE_CHAR);
 
   set_output_elt(OUTPUT_END, "This", "Is", "The", "End", "%s",
 		 NULL, 0, 0, NETPERF_TYPE_CHAR);
@@ -7150,6 +7167,8 @@ scan_omni_args(int argc, char *argv[])
   int		c;
   int           have_uuid = 0;
   int           have_R_option = 0;
+  int           sysctl_value;
+  size_t        sysctl_len;
 
   char
     arg1[BUFSIZ],  /* argument holders		*/
@@ -7665,6 +7684,19 @@ scan_omni_args(int argc, char *argv[])
     keep_statistics = 1;
     keep_histogram = 1;
   }
+
+  sysctl_len = sizeof(sysctl_value);
+  if (sysctlbyname("kern.features.cheri_kernel", &sysctl_value,
+		   &sysctl_len, NULL, 0)) {
+    cheri_kernel_abi = "hybrid";
+  } else {
+    cheri_kernel_abi = "purecap";
+  }
+#ifdef __CHERI_PURE_CAPABILITY__
+	cheri_netperf_abi = "purecap";
+#else
+	cheri_netperf_abi = "hybrid";
+#endif
 
 }
 

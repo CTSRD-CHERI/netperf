@@ -16,7 +16,7 @@
 static FILE *statfile;
 static statcounters_bank_t start, stop;
 static statcounters_bank_t scratch;
-static char benchmark_progname[MAXPRINTLEN];
+static const char *benchmark_progname;
 static char benchmark_archname[MAXPRINTLEN];
 static const char *benchmark_kernabi;
 
@@ -48,20 +48,7 @@ pmc_profile_setup(const char *side)
 		exit(1);
 	}
 
-	maxlen = sizeof(cheri_kernel);
-	if (sysctlbyname("kern.features.cheri_kernel", &cheri_kernel,
-	    &maxlen, NULL, 0)) {
-		benchmark_kernabi = "hybrid";
-	} else {
-		benchmark_kernabi = "purecap";
-	}
-#ifdef __CHERI_PURE_CAPABILITY__
-	netperf_abi = "purecap";
-#else
-	netperf_abi = "hybrid";
-#endif
-	snprintf(benchmark_progname, MAXPRINTLEN, "%s-%s:%s",
-		 side, netperf_abi, benchmark_kernabi);
+	benchmark_progname = side;
 
 	statcounters_zero(&start);
 	statcounters_zero(&stop);
