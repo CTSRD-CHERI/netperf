@@ -1,4 +1,6 @@
 *.in
+!scripts/*.in
+scripts/Makefile.in
 /aclocal.m4
 /autom4te.cache/
 /compile

@@ -1,0 +1,144 @@
+#!/bin/sh
+
+usage() {
+    echo "Usage $0 [options] <configuration>"
+
+    echo "configurations: "
+    echo "options:"
+    echo "\t-p <path>\tNetperf base path"
+    echo "\t-c <config>\tBenchmark configuration to run"
+    echo "\t-i <iterations>\tNumber of iterations of the benchmark"
+    echo "\t-s\t\tMeasure statcounters on netperf client side"
+    echo "\t-S\t\tMeasure statcounters on netserver side"
+    echo "\t-k UUID\tSpecify UUID for the run (may use existing UUID to append)"
+    echo "\t-h\t\tDisplay help"
+}
+
+run_netserver() {
+    echo -n "Spawn netserver..."
+    extra_args=""
+    if [ "${measure_netserver}" = "y" ]; then
+	extra_args="-g all -G ${netserver_pmc_csv}"
+    fi
+    $netserver -D ${extra_args} &
+    netserver_pid=$!
+    echo " started on PID ${netserver_pid}"
+}
+
+kill_netserver() {
+    echo -n "Stopping netserver..."
+    if [ $netserver_pid -ne 0 ]; then
+	kill $netserver_pid
+    fi
+    echo " Done"
+}
+
+prime_netperf() {
+    if [ "${measure_netperf}" = "y" ]; then
+	pmc_args="-g all -G ${netperf_pmc_csv}"
+	pmc_prime_args="-g all -G /dev/null"
+    fi
+    extra_args=$1
+    echo "${netperf} -i ${iterations} ${pmc_args} ${extra_args} >> ${netperf_out_csv}"
+    ${netperf} -i -5 ${pmc_prime_args} ${extra_args} >> /dev/null
+}
+
+run_netperf() {
+    if [ "${measure_netperf}" = "y" ]; then
+	pmc_args="-g all -G ${netperf_pmc_csv}"
+    fi
+    extra_args=$1
+    if [ -s ${netperf_out_csv} ]; then
+	header=0
+    else
+	header=1
+    fi
+    cmd="${netperf} -P ${header} -i ${iterations} ${pmc_args} ${extra_args}"
+    $cmd >> ${netperf_out_csv}
+}
+
+# Run a configuration of the netperf benchmark
+run_netperf_conf() {
+    echo -n " Running netperf conf [$1] "
+
+    case "$1" in
+	UDP_RR_50K_FIXED)
+	    transactions="-50000"
+	    prime_netperf "-l ${transactions} -t UDP_RR -- -o all -r 1,1 -u ${run_id}"
+	    run_netperf "-l ${transactions} -t UDP_RR -- -o all -r 1,1 -u ${run_id}"
+	    ;;
+	UDP_RR_LOGSIZE)
+	    transactions="-10000"
+	    prime_netperf "-l ${transactions} -t UDP_RR -- -o all -r 5,5"
+	    echo -n "xfer size 2^5-2^20 bytes "
+	    for logsize in {5..20}; do
+		size=$(( 2 ** ${logsize} ))
+		run_netperf "-l ${transactions} -t UDP_RR -- -o all -r ${size},${size}"
+	    done
+	    ;;
+	*)
+	    echo -n "Unkwnown configuration ${1}"
+	    ;;
+    esac
+
+    echo "Done"
+}
+
+arch=@TARGET_CPU@
+netperf_prefix="/opt/${arch}-purecap/netperf/bin"
+netserver_pid=0
+
+iterations=10
+measure_netperf=""
+measure_netserver=""
+
+test_configuration="UDP_RR_50K_FIXED"
+run_id=$(uuidgen)
+
+while getopts "hsSi:c:p:k:" arg; do
+    case "$arg" in
+	h)
+	    usage
+	    ;;
+	c)
+	    test_configuration=$OPTARG
+	    ;;
+	p)
+	    netperf_prefix=$OPTARG
+	    ;;
+	s)
+	    measure_netperf="y"
+	    ;;
+	S)
+	    measure_netserver="y"
+	    ;;
+	i)
+	    iterations=$OPTARG
+	    ;;
+	k)
+	    run_id=$OPTARG
+	    ;;
+    esac
+done
+
+netperf="${netperf_prefix}/${arch}-unknown-freebsd13-netperf"
+netserver="${netperf_prefix}/${arch}-unknown-freebsd13-netserver"
+netperf_out_csv="netperf-output-${run_id}.csv"
+netperf_pmc_csv="netperf-pmc-${run_id}.csv"
+netserver_pmc_csv="netserver-pmc-${run_id}.csv"
+if [ ! -f "$netperf" ]; then
+    echo " Missing netperf binary $netperf"
+    exit 1
+fi
+if [ ! -f "$netserver" ]; then
+    echo " Missing netserver binary $netserver"
+    exit 1
+fi
+
+echo "Starting benchmark..."
+export STATCOUNTERS_NO_AUTOSAMPLE=1
+run_netserver
+sleep 1
+run_netperf_conf $test_configuration
+echo "Benchmarking done!"
+kill_netserver
