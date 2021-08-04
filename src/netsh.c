@@ -87,7 +87,7 @@ extern	int	getopt(int , char **, char *) ;
    getopt to parse the command line, we will tell getopt that they do
    not take parms, and then look for them ourselves */
 
-#define GLOBAL_CMD_LINE_ARGS "A:a:b:B:CcdD:f:F:g:G:H:hi:I:jk:K:l:L:n:NO:o:P:p:rSs:t:T:v:VW:w:y:Y:Z:46"
+#define GLOBAL_CMD_LINE_ARGS "A:a:b:B:CcdD:f:F:g:G:H:hi:I:jk:K:l:L:n:NO:o:P:p:rSs:t:T:v:VW:w:y:Y:zZ:46"
 
 /************************************************************************/
 /*									*/
@@ -915,6 +915,10 @@ scan_cmd_line(int argc, char *argv[])
 	  fflush(where);
 	}
       }
+      break;
+    case 'z':
+      raise(SIGSTOP);
+      exit(1);
       break;
     case 'Z':
       /* only copy as much of the passphrase as could fit in the

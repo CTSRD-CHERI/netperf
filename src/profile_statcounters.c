@@ -2,11 +2,16 @@
  * Insert copyright here
  */
 
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <sys/param.h>
 #include <sys/sysctl.h>
+#include <machine/cheri.h>
+#include <machine/cpufunc.h>
+#include <machine/sysarch.h>
 
 #include "netlib.h"
 #include "netsh.h"
@@ -19,6 +24,10 @@ static statcounters_bank_t scratch;
 static const char *benchmark_progname;
 static char benchmark_archname[MAXPRINTLEN];
 static const char *benchmark_kernabi;
+/* Run qemu tracing NOPS at benchmark boundaries */
+static bool profile_qtrace = false;
+
+#define PMC_SET_QEMU "qemu"
 
 void
 pmc_profile_setup(const char *side)
@@ -28,9 +37,28 @@ pmc_profile_setup(const char *side)
 	const char *netperf_abi;
 	const char *test_end_condition;
 	int test_end_value;
+  int tmp;
 
 	if (!pmc_profile_enabled)
 		return;
+
+  /* Resolve performance counters sets to trace */
+  if (strcmp(PMC_SET_QEMU, pmc_profile_setname) == 0)
+      profile_qtrace = true;
+  /* XXX check other counter sets */
+
+  if (profile_qtrace) {
+    tmp = 1;
+    if (sysctlbyname("hw.qemu_trace_perthread", NULL, NULL,
+                     &tmp, sizeof(tmp))) {
+      perror("Can not setup qemu tracing");
+      exit(1);
+    }
+    if (sysarch(QEMU_SET_QTRACE, &tmp)) {
+      perror("Can not setup qemu tracing");
+      exit(1);
+    }
+  }
 
 	if (pmc_profile_path == NULL) {
 		pmc_profile_path = malloc(MAXPATHLEN);
@@ -70,6 +98,9 @@ _pmc_profile_dump()
 	    NULL, benchmark_archname,
 	    statfile, csv_fmt);
 
+  if (profile_qtrace)
+      QEMU_FLUSH_TRACE_BUFFER;
+
 	/* Reset for next iteration */
 	statcounters_zero(&start);
 	statcounters_zero(&stop);
@@ -79,6 +110,8 @@ _pmc_profile_dump()
 void
 _pmc_profile_start()
 {
+  if (profile_qtrace)
+    CHERI_START_TRACE;
 	statcounters_sample(&start);
 }
 
@@ -86,4 +119,6 @@ void
 _pmc_profile_stop()
 {
 	statcounters_sample(&stop);
+  if (profile_qtrace)
+    CHERI_STOP_TRACE;
 }
