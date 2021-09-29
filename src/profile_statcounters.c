@@ -26,28 +26,33 @@ static char benchmark_archname[MAXPRINTLEN];
 static const char *benchmark_kernabi;
 /* Run qemu tracing NOPS at benchmark boundaries */
 static bool profile_qtrace = false;
+static bool profile_thread_qtrace = false;
 
 #define PMC_SET_QEMU "qemu"
+#define PMC_SET_QEMU_THREAD "qemu-thread"
 
 void
 pmc_profile_setup(const char *side)
 {
 	size_t maxlen;
-	int cheri_kernel;
 	const char *netperf_abi;
 	const char *test_end_condition;
+  int cheri_kernel;
 	int test_end_value;
   int tmp;
+  bool qemu_perthread = false;
 
 	if (!pmc_profile_enabled)
 		return;
 
   /* Resolve performance counters sets to trace */
   if (strcmp(PMC_SET_QEMU, pmc_profile_setname) == 0)
-      profile_qtrace = true;
+    profile_qtrace = true;
+  else if (strcmp(PMC_SET_QEMU_THREAD, pmc_profile_setname) == 0)
+    profile_thread_qtrace = profile_qtrace = true;
   /* XXX check other counter sets */
 
-  if (profile_qtrace) {
+  if (profile_thread_qtrace) {
     tmp = 1;
     if (sysctlbyname("hw.qemu_trace_perthread", NULL, NULL,
                      &tmp, sizeof(tmp))) {
