@@ -7,8 +7,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <unistd.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
+#include <sys/thr.h>
 #include <machine/cheri.h>
 #include <machine/cpufunc.h>
 #include <machine/sysarch.h>
@@ -56,10 +58,6 @@ pmc_profile_setup(const char *side)
     tmp = 1;
     if (sysctlbyname("hw.qemu_trace_perthread", NULL, NULL,
                      &tmp, sizeof(tmp))) {
-      perror("Can not setup qemu tracing");
-      exit(1);
-    }
-    if (sysarch(QEMU_SET_QTRACE, &tmp)) {
       perror("Can not setup qemu tracing");
       exit(1);
     }
@@ -115,15 +113,45 @@ _pmc_profile_dump()
 void
 _pmc_profile_start()
 {
-  if (profile_qtrace)
+  int tmp = 1;
+  pid_t pid;
+  long tid;
+
+  if (profile_qtrace) {
+    pid = getpid();
+    thr_self(&tid);
+    // Make sure the correct context is recorded.
+    // This must be done before tracing starts. This should be resilient to
+    // context switches taken before the beginning of tracing.
+    QEMU_EVENT_CONTEXT_SETUP(pid, tid, 0);
+    // Note: We use the QTRACE flag to notify the OS that it
+    // should switch tracing on/off on this thread, so we need to set
+    // it only within the tracing slice we are using, otherwise we
+    // will pick-up extra trace slices because of context switching.
+    // The order is relevant. We first need to set the QTRACE flag
+    // and then enable tracing, otherwise we may pick up things from
+    // other threads.
+    if (sysarch(QEMU_SET_QTRACE, &tmp)) {
+      perror("Can not setup qemu tracing");
+      exit(1);
+    }
     CHERI_START_TRACE;
+  }
 	statcounters_sample(&start);
 }
 
 void
 _pmc_profile_stop()
 {
+  int tmp = 0;
+
 	statcounters_sample(&stop);
-  if (profile_qtrace)
+  if (profile_qtrace) {
+    // See _pmc_profile_start
+    if (sysarch(QEMU_SET_QTRACE, &tmp)) {
+      perror("Can not setup qemu tracing");
+      exit(1);
+    }
     CHERI_STOP_TRACE;
+  }
 }

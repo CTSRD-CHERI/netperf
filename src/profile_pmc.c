@@ -56,7 +56,7 @@ pmc_cpu_setup(int cpuid)
     pmc_name = arch_pmc[++index];
   }
 }
-  
+
 void
 pmc_profile_setup()
 {
@@ -84,11 +84,11 @@ pmc_profile_setup()
   for (ncpu = 0; ncpu < cpuinfo->pm_ncpu; ncpu++) {
     pmc_cpu_setup(ncpu);
   }
-    
+
   if (pmc_configure_logfile(pmc_logfile_handle)) {
     perror("netpmc: can not configure logfile");
     exit(1);
-  }    
+  }
 }
 
 void
