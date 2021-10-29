@@ -1396,6 +1396,10 @@ netperf_output_enum_to_str(enum netperf_output_name output_name)
     return "REMOTE_FILL_FILE";
   case OUTPUT_END:
     return "OUTPUT_END";
+  case NETPERF_ABI:
+    return "NETPERF_ABI";
+  case KERNEL_ABI:
+    return "KERNEL_ABI";
   default:
     return "!UNKNOWN OUTPUT SELECTOR!";
   }
