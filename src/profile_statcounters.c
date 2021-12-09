@@ -61,6 +61,9 @@ pmc_profile_setup(const char *side)
       exit(1);
     }
   }
+  if (profile_qtrace) {
+    QEMU_EVENT_MARKER(0xbeef);
+  }
 
 	if (pmc_profile_path == NULL) {
 		pmc_profile_path = malloc(MAXPATHLEN);
