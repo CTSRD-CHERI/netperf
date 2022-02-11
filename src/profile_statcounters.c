@@ -62,7 +62,11 @@ pmc_profile_setup(const char *side)
     }
   }
   if (profile_qtrace) {
+    CHERI_START_TRACE;
     QEMU_EVENT_MARKER(0xbeef);
+    CHERI_STOP_TRACE;
+  }
+
   }
 
 	if (pmc_profile_path == NULL) {
@@ -120,26 +124,32 @@ _pmc_profile_start()
   long tid;
 
   if (profile_qtrace) {
+    /* This is extra work that whould probably be avoided here */
     pid = getpid();
     thr_self(&tid);
-    // Make sure the correct context is recorded.
-    // This must be done before tracing starts. This should be resilient to
-    // context switches taken before the beginning of tracing.
-    QEMU_EVENT_CONTEXT_SETUP(pid, tid, -1UL);
-    // Note: We use the QTRACE flag to notify the OS that it
-    // should switch tracing on/off on this thread, so we need to set
-    // it only within the tracing slice we are using, otherwise we
-    // will pick-up extra trace slices because of context switching.
-    // The order is relevant. We first need to set the QTRACE flag
-    // and then enable tracing, otherwise we may pick up things from
-    // other threads.
+    /*
+     * Note: We use the QTRACE flag to notify the OS that it
+     * should switch tracing on/off on this thread, so we need to set
+     * it on profiling start and end, otherwise we
+     * will pick-up extra information from the rest of the benchmark.
+     * The order is relevant. We first need to set the QTRACE flag
+     * and then enable tracing, otherwise we may pick up things from
+     * other threads.
+     */
     if (profile_thread_qtrace && sysarch(QEMU_SET_QTRACE, &tmp)) {
       perror("Can not setup qemu tracing");
       exit(1);
     }
     CHERI_START_TRACE;
+    /*
+     * Make sure that we use the correct context for tracing.
+     * We accept the fact that if we trace perthread, we may miss
+     * the first context switch if we happen to switch just after
+     * the sysarch.
+     */
+    QEMU_EVENT_CONTEXT_UPDATE(pid, tid, -1UL);
   }
-	statcounters_sample(&start);
+  statcounters_sample(&start);
 }
 
 void
