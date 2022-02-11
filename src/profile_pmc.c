@@ -19,14 +19,14 @@ static int pmc_num_handles;
 /* RISCV counters counters */
 static const char *cheri_riscv_pmc[] =
   {
-   "CYCLE",
-   "INST",
-   "DCACHE_READ_MISS",
-   "DCACHE_WRITE_MISS",
-   NULL
+    "CYCLE",
+    "INST",
+    "DCACHE_READ_MISS",
+    "DCACHE_WRITE_MISS",
+    NULL
   };
 
-#define PMC_HANDLE(cpu, index)			\
+#define PMC_HANDLE(cpu, index)                  \
   &cpu_pmc[cpu * cpuinfo->pm_npmc + index]
 
 static void
@@ -45,7 +45,7 @@ pmc_cpu_setup(int cpuid)
   pmc_name = arch_pmc[0];
   while (pmc_name != NULL) {
     error = pmc_allocate(pmc_name, PMC_MODE_SC, /*flags*/0,
-      cpuid, PMC_HANDLE(cpuid, index), /*count*/0);
+                         cpuid, PMC_HANDLE(cpuid, index), /*count*/0);
     if (error != ENXIO) {
       fprintf(stderr, "netpmc: can not allocate PMC %s", pmc_name);
       exit(1);

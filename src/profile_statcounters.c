@@ -36,15 +36,15 @@ static bool profile_thread_qtrace = false;
 void
 pmc_profile_setup(const char *side)
 {
-	size_t maxlen;
-	const char *netperf_abi;
-	const char *test_end_condition;
-	int test_end_value;
+  size_t maxlen;
+  const char *netperf_abi;
+  const char *test_end_condition;
+  int test_end_value;
   int tmp;
   bool qemu_perthread = false;
 
-	if (!pmc_profile_enabled)
-		return;
+  if (!pmc_profile_enabled)
+    return;
 
   /* Resolve performance counters sets to trace */
   if (strcmp(PMC_SET_QEMU, pmc_profile_setname) == 0)
@@ -67,53 +67,51 @@ pmc_profile_setup(const char *side)
     CHERI_STOP_TRACE;
   }
 
+  if (pmc_profile_path == NULL) {
+    pmc_profile_path = malloc(MAXPATHLEN);
+    snprintf(pmc_profile_path, MAXPATHLEN, "%s.csv", side);
+  }
+  statfile = fopen(pmc_profile_path, "a+");
+  if (statfile == NULL) {
+    perror("Can not open pmc stats file");
+    exit(1);
   }
 
-	if (pmc_profile_path == NULL) {
-		pmc_profile_path = malloc(MAXPATHLEN);
-		snprintf(pmc_profile_path, MAXPATHLEN, "%s.csv", side);
-	}
-	statfile = fopen(pmc_profile_path, "a+");
-	if (statfile == NULL) {
-		perror("Can not open pmc stats file");
-		exit(1);
-	}
+  maxlen = sizeof(benchmark_archname);
+  if (sysctlbyname("hw.machine_arch", &benchmark_archname, &maxlen, NULL, 0)) {
+    perror("Can not determine hw.machine_arch");
+    exit(1);
+  }
 
-	maxlen = sizeof(benchmark_archname);
-	if (sysctlbyname("hw.machine_arch", &benchmark_archname, &maxlen, NULL, 0)) {
-		perror("Can not determine hw.machine_arch");
-		exit(1);
-	}
+  benchmark_progname = side;
 
-	benchmark_progname = side;
-
-	statcounters_zero(&start);
-	statcounters_zero(&stop);
-	statcounters_zero(&scratch);
+  statcounters_zero(&start);
+  statcounters_zero(&stop);
+  statcounters_zero(&scratch);
 }
 
 void
 _pmc_profile_dump()
 {
-	statcounters_fmt_flag_t csv_fmt;
+  statcounters_fmt_flag_t csv_fmt;
 
-	if (ftello(statfile) == 0)
-		csv_fmt = CSV_HEADER;
-	else
-		csv_fmt = CSV_NOHEADER;
+  if (ftello(statfile) == 0)
+    csv_fmt = CSV_HEADER;
+  else
+    csv_fmt = CSV_NOHEADER;
 
-	statcounters_diff(&scratch, &stop, &start);
-	statcounters_dump_with_args(&scratch, benchmark_progname,
-	    NULL, benchmark_archname,
-	    statfile, csv_fmt);
+  statcounters_diff(&scratch, &stop, &start);
+  statcounters_dump_with_args(&scratch, benchmark_progname,
+                              NULL, benchmark_archname,
+                              statfile, csv_fmt);
 
   if (profile_qtrace)
-      QEMU_FLUSH_TRACE_BUFFER;
+    QEMU_FLUSH_TRACE_BUFFER;
 
-	/* Reset for next iteration */
-	statcounters_zero(&start);
-	statcounters_zero(&stop);
-	statcounters_zero(&scratch);
+  /* Reset for next iteration */
+  statcounters_zero(&start);
+  statcounters_zero(&stop);
+  statcounters_zero(&scratch);
 }
 
 void
@@ -157,7 +155,7 @@ _pmc_profile_stop()
 {
   int tmp = 0;
 
-	statcounters_sample(&stop);
+  statcounters_sample(&stop);
   if (profile_qtrace) {
     // See _pmc_profile_start
     if (profile_thread_qtrace && sysarch(QEMU_SET_QTRACE, &tmp)) {
