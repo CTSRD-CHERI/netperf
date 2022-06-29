@@ -91,6 +91,10 @@ pmc_profile_setup(const char *side)
 }
 
 void
+pmc_profile_teardown()
+{}
+
+void
 _pmc_profile_dump()
 {
   statcounters_fmt_flag_t csv_fmt;

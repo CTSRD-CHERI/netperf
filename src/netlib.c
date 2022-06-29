@@ -2306,6 +2306,19 @@ bind_to_specific_processor(int use_cpu_affinity, int use_cpu_map)
      which we are running rather than the CPU binding, so it's return
      value will not tell you if you are bound vs unbound. */
   bindprocessor(BINDPROCESS,getpid(),(cpu_t)mapped_affinity);
+#elif HAVE_CPUSET_SETAFFINITY
+#include <sys/param.h>
+#include <sys/cpuset.h>
+  /* FreeBSD introduced cpuset_setaffinity() in version 7.1 */
+  cpuset_t mask;
+
+  CPU_ZERO(&mask);
+  CPU_SET(mapped_affinity, &mask);
+  if (cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1,
+                         sizeof(mask), &mask)) {
+	perror("cpuset_setaffinity failed");
+	fflush(stderr);
+  }
 #elif HAVE_SCHED_SETAFFINITY
 #include <sched.h>
   /* in theory this should cover systems with more CPUs than bits in a
@@ -2403,23 +2416,6 @@ bind_to_specific_processor(int use_cpu_affinity, int use_cpu_map)
       fflush(where);
     }
   }
-
-#elif defined(__FreeBSD__)
-#include <sys/param.h>
-  /* FreeBSD introduced cpuset_setaffinity() in version 7.1 */
-#if (__FreeBSD_version > 701000)
-#include <sys/cpuset.h>
-
-  cpuset_t mask;
-
-  CPU_ZERO(&mask);
-  CPU_SET(mapped_affinity, &mask);
-  if (cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_PID, -1,
-			 sizeof(mask), &mask)) {
-	perror("cpuset_setaffinity failed");
-	fflush(stderr);
-  }
-#endif /* __FreeBSD_version */
 #else
   if (debug) {
     fprintf(where,

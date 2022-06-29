@@ -297,6 +297,8 @@ main(int argc, char *argv[])
     exit(1);
   }
 
+  pmc_profile_teardown();
+
   if (!no_control) {
     shutdown_control();
   }

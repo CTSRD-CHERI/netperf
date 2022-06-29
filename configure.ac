@@ -108,7 +108,7 @@ AC_CHECK_FUNCS(sendfile)
 AC_CHECK_FUNCS(uname)
 
 # check for the various CPU binding calls
-AC_CHECK_FUNCS(mpctl processor_bind sched_setaffinity bind_to_cpu_id bindprocessor)
+AC_CHECK_FUNCS(mpctl processor_bind sched_setaffinity bind_to_cpu_id bindprocessor cpuset_setaffinity)
 
 # see if we should be enabling histogram support
 

@@ -4,6 +4,7 @@
 
 #ifdef WITH_HW_COUNTERS
 extern void pmc_profile_setup(const char *side);
+extern void pmc_profile_teardown(void);
 extern void _pmc_profile_dump(void);
 extern void _pmc_profile_start(void);
 extern void _pmc_profile_stop(void);
@@ -26,6 +27,7 @@ extern void _pmc_iteration_stop(void);
   } while (0)
 #else
 #define pmc_profile_setup(side)
+#define pmc_profile_teardown()
 #define pmc_profile_dump()
 #define pmc_profile_start()
 #define pmc_profile_stop()

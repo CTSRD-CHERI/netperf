@@ -1573,6 +1573,7 @@ main(int argc, char *argv[]) {
 
   unlink_empty_debug_file();
 
+  pmc_profile_teardown();
 #ifdef WIN32
   WSACleanup();
 #endif
