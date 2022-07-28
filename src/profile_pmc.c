@@ -53,10 +53,35 @@ static const struct netperf_pmc profclock_pmc_set[] = {
 
 static const struct netperf_pmc toooba_pmc_set[] = {
   { "CYCLES", PMC_MODE_SC, 0 },
-  /* { "INSTRET" }, */
-  /* { "TIME" }, */
-  /* { "BRANCH" }, */
-  /* { "TRAP" }, */
+  { "INSTRET", PMC_MODE_SC, 0 },
+  { "TIME", PMC_MODE_SC, 0 },
+  { "REDIRECT", PMC_MODE_SC, 0 },
+  { "BRANCH", PMC_MODE_SC, 0 },
+  { "JAL", PMC_MODE_SC, 0 },
+  { "JALR", PMC_MODE_SC, 0 },
+  { "TRAP", PMC_MODE_SC, 0 },
+  { "LOAD_WAIT", PMC_MODE_SC, 0 },
+  { "MEM_CAP_LOAD", PMC_MODE_SC, 0 },
+  { "MEM_CAP_STORE", PMC_MODE_SC, 0 },
+  { "ITLB_MISS", PMC_MODE_SC, 0 },
+  { "L1I_LD", PMC_MODE_SC, 0 },
+  { "L1I_LD_MISS", PMC_MODE_SC, 0 },
+  { "L1I_LD_MISS_LAT", PMC_MODE_SC, 0 },
+  { "DTLB_LD", PMC_MODE_SC, 0 },
+  { "DTLB_MISS", PMC_MODE_SC, 0 },
+  { "DTLB_MISS_LAT", PMC_MODE_SC, 0 },
+  { "L1D_LD", PMC_MODE_SC, 0 },
+  { "L1D_LD_MISS", PMC_MODE_SC, 0 },
+  { "L1D_LD_MISS_LAT", PMC_MODE_SC, 0 },
+  { "L1D_ST", PMC_MODE_SC, 0 },
+  { "L1D_ST_MISS", PMC_MODE_SC, 0 },
+  { "LL_LD_MISS", PMC_MODE_SC, 0 },
+  { "LL_LD_MISS_LAT", PMC_MODE_SC, 0 },
+  { "TGC_READ", PMC_MODE_SC, 0 },
+  { "TGC_READ_MISS", PMC_MODE_SC, 0 },
+  { "LL_ST_MISS", PMC_MODE_SC, 0 },
+  { "TGC_WRITE_MISS", PMC_MODE_SC, 0 },
+  { "TGC_EVICT", PMC_MODE_SC, 0 },
 };
 
 static void
